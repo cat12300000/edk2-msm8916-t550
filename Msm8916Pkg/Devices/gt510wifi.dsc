@@ -16,12 +16,12 @@
 
 [PcdsFixedAtBuild.common]
   # Simple FrameBuffer
-  gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferWidth|1024
-  gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferHeight|768
+  gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferWidth|768
+  gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferHeight|1024
   gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferAddress|0x8e000000
   gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferPixelBpp|32
-  gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferVisibleWidth|1024
-  gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferVisibleHeight|768
+  gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferVisibleWidth|768
+  gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferVisibleHeight|1024
 
   # SmBios Information
   gMsm8916PkgTokenSpaceGuid.PcdDeviceVendor|"Samsung"
