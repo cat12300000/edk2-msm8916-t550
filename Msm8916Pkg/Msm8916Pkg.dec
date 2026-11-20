@@ -73,6 +73,8 @@
   gQcomTokenSpaceGuid.PcdGpioTlmmIntrEnableBit|0|UINT64|0x0000010c
   gQcomTokenSpaceGuid.PcdGpioTlmmIntrStatusBit|0|UINT64|0x0000010d
   gQcomTokenSpaceGuid.PcdGpioTlmmIntrAckHigh|FALSE|BOOLEAN|0x0000010e
+  gQcomTokenSpaceGuid.PcdSdCardDetectGpio|0xFFFFFFFF|UINT32|0x000000ea
+  gQcomTokenSpaceGuid.PcdSdCardDetectActiveLow|TRUE|BOOLEAN|0x000000eb
   gQcomTokenSpaceGuid.PcdGpioTlmmIntrTargetBit|0|UINT64|0x0000010f
   gQcomTokenSpaceGuid.PcdGpioTlmmIntrTargetKpssValue|0|UINT64|0x00000110
   gQcomTokenSpaceGuid.PcdGpioTlmmIntrRawStatusBit|0|UINT64|0x00000111

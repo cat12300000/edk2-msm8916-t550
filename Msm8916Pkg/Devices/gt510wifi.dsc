@@ -23,6 +23,10 @@
   gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferVisibleWidth|768
   gMsm8916PkgTokenSpaceGuid.PcdMipiFrameBufferVisibleHeight|1024
 
+  # SD card detect
+  gQcomTokenSpaceGuid.PcdSdCardDetectGpio|38
+  gQcomTokenSpaceGuid.PcdSdCardDetectActiveLow|TRUE
+
   # SmBios Information
   gMsm8916PkgTokenSpaceGuid.PcdDeviceVendor|"Samsung"
   gMsm8916PkgTokenSpaceGuid.PcdDeviceProduct|"Galaxy Tab A 9.7 2015"

@@ -31,11 +31,13 @@ typedef struct {
 STATIC KEY_CONTEXT_PRIVATE KeyContextPower;
 STATIC KEY_CONTEXT_PRIVATE KeyContextVolumeUp;
 STATIC KEY_CONTEXT_PRIVATE KeyContextVolumeDown;
+STATIC KEY_CONTEXT_PRIVATE KeyContextHome;
 
 STATIC KEY_CONTEXT_PRIVATE* KeyList[] = {
   &KeyContextPower,
   &KeyContextVolumeUp,
-  &KeyContextVolumeDown
+  &KeyContextVolumeDown,
+  &KeyContextHome
 };
 
 STATIC
@@ -62,8 +64,37 @@ KeypadKeyCodeToKeyContext (
     return &KeyContextVolumeUp;
   }else if (KeyCode == 116){
     return &KeyContextPower;
+  }else if (KeyCode == 102){
+    return &KeyContextHome;
   }else
     return NULL;
+}
+
+STATIC BOOLEAN GpioConfigured = FALSE;
+
+STATIC
+VOID
+KeypadConfigureGpios (
+  VOID
+  )
+{
+  if (GpioConfigured || gGpioTlmm == NULL) {
+    return;
+  }
+
+  // Vol Up: TLMM GPIO 107, active-low, pull-up
+  gGpioTlmm->SetFunction(107, 0);
+  gGpioTlmm->SetPull(107, GPIO_PULL_UP);
+  gGpioTlmm->SetDriveStrength(107, 2);
+  gGpioTlmm->DirectionInput(107);
+
+  // Home: TLMM GPIO 109, active-low, pull-up
+  gGpioTlmm->SetFunction(109, 0);
+  gGpioTlmm->SetPull(109, GPIO_PULL_UP);
+  gGpioTlmm->SetDriveStrength(109, 2);
+  gGpioTlmm->DirectionInput(109);
+
+  GpioConfigured = TRUE;
 }
 
 RETURN_STATUS
@@ -80,32 +111,41 @@ KeypadDeviceImplConstructor (
     KeypadInitializeKeyContextPrivate (KeyList[Index]);
   }
 
-  // Configure keys
-
-  // Vol Up (115) , Camera Splash (766) and Camera Focus (528)
-  // go through TLMM GPIO
+  // Vol Up (115) on TLMM GPIO 107
   StaticContext = KeypadKeyCodeToKeyContext(115);
-  StaticContext->DeviceType = KEY_DEVICE_TYPE_PM8X41;
-  StaticContext->Gpio = 90;
-  StaticContext->ActiveLow = 0x0 & 0x0;
-  StaticContext->IsValid = FALSE;
+  StaticContext->DeviceType = KEY_DEVICE_TYPE_TLMM;
+  StaticContext->Gpio = 107;
+  StaticContext->ActiveLow = TRUE;
+  StaticContext->IsValid = TRUE;
 
-  // Vol Down (114) and Power On (116) on through PMIC PON
+  // Home (102) on TLMM GPIO 109
+  StaticContext = KeypadKeyCodeToKeyContext(102);
+  StaticContext->DeviceType = KEY_DEVICE_TYPE_TLMM;
+  StaticContext->Gpio = 109;
+  StaticContext->ActiveLow = TRUE;
+  StaticContext->IsValid = TRUE;
+
+  // Vol Down (114) on PMIC RESIN
   StaticContext = KeypadKeyCodeToKeyContext(114);
   StaticContext->DeviceType = KEY_DEVICE_TYPE_PM8X41_PON;
   StaticContext->PonType = 1;
-  StaticContext->IsValid = FALSE;
+  StaticContext->ActiveLow = FALSE;
+  StaticContext->IsValid = TRUE;
 
+  // Power (116) on PMIC PON
   StaticContext = KeypadKeyCodeToKeyContext(116);
   StaticContext->DeviceType = KEY_DEVICE_TYPE_PM8X41_PON;
   StaticContext->PonType = 0;
-  StaticContext->IsValid = FALSE;
+  StaticContext->ActiveLow = FALSE;
+  StaticContext->IsValid = TRUE;
 
   return RETURN_SUCCESS;
 }
 
 EFI_STATUS EFIAPI KeypadDeviceImplReset (KEYPAD_DEVICE_PROTOCOL *This)
 {
+  KeypadConfigureGpios();
+
   LibKeyInitializeKeyContext(&KeyContextPower.EfiKeyContext);
   KeyContextPower.EfiKeyContext.KeyData.Key.UnicodeChar = CHAR_CARRIAGE_RETURN;
 
@@ -114,6 +154,9 @@ EFI_STATUS EFIAPI KeypadDeviceImplReset (KEYPAD_DEVICE_PROTOCOL *This)
 
   LibKeyInitializeKeyContext(&KeyContextVolumeDown.EfiKeyContext);
   KeyContextVolumeDown.EfiKeyContext.KeyData.Key.ScanCode = SCAN_DOWN;
+
+  LibKeyInitializeKeyContext(&KeyContextHome.EfiKeyContext);
+  KeyContextHome.EfiKeyContext.KeyData.Key.ScanCode = SCAN_ESC;
 
   return EFI_SUCCESS;
 }

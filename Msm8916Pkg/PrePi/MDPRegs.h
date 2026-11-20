@@ -1,12 +1,16 @@
 #ifndef _MDP_REGS_H_
 #define _MDP_REGS_H_
 
+#define PIPE_SSPP_SRC_SIZE                      0x00
+#define PIPE_SSPP_SRC_IMG_SIZE                  0x04
+#define PIPE_SSPP_SRC_XY                        0x08
+#define PIPE_SSPP_SRC_OUT_SIZE                  0x0C
+#define PIPE_SSPP_SRC0_ADDR                     0x14
+#define PIPE_SSPP_SRC_YSTRIDE                   0x24
 #define PIPE_SSPP_SRC_FORMAT                    0x30
 #define PIPE_SSPP_SRC_UNPACK_PATTERN            0x34
 #define PIPE_BASE				0x1A15000
 #define PIPE_BASE1				0x1A17000
-#define PIPE_SSPP_SRC_YSTRIDE			0x24
-
 #define MDP_BASE                    (0x1A00000)
 #define REG_MDP(off)                (MDP_BASE + (off))
 #define MDP_HW_REV                              REG_MDP(0x1000)

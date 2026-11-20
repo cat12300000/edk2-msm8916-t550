@@ -109,10 +109,15 @@ PrePiMain (
   // Flush FrameBuffer
   PaintScreen(0);
 
-  /* Switch to 32bpp argb8888 */
+  /* Switch to 32bpp argb8888 and point the MDP at our framebuffer */
+  MmioWrite32(PIPE_BASE + PIPE_SSPP_SRC0_ADDR, (UINT32)FbAddr);
+  MmioWrite32(PIPE_BASE + PIPE_SSPP_SRC_SIZE, (UINT32)((Width & 0xFFFF) | ((Height & 0xFFFF) << 16)));
+  MmioWrite32(PIPE_BASE + PIPE_SSPP_SRC_IMG_SIZE, (UINT32)((Width & 0xFFFF) | ((Height & 0xFFFF) << 16)));
+  MmioWrite32(PIPE_BASE + PIPE_SSPP_SRC_XY, 0);
+  MmioWrite32(PIPE_BASE + PIPE_SSPP_SRC_OUT_SIZE, (UINT32)((Width & 0xFFFF) | ((Height & 0xFFFF) << 16)));
+  MmioWrite32(PIPE_BASE + PIPE_SSPP_SRC_YSTRIDE, Width * Bpp / 8);
   MmioWrite32(PIPE_BASE + PIPE_SSPP_SRC_FORMAT, 0x000236FF);
   MmioWrite32(PIPE_BASE + PIPE_SSPP_SRC_UNPACK_PATTERN, 0x03020001);
-  MmioWrite32(PIPE_BASE + PIPE_SSPP_SRC_YSTRIDE, Width * Bpp / 8);
   MmioWrite32(MDP_CTL_0_BASE + CTL_FLUSH, (1 << (3)));
 
   // Initialize the architecture specific bits
