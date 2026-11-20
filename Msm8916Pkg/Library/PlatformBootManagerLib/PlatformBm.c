@@ -448,6 +448,9 @@ VOID PlatformRegisterOptionsAndKeys(VOID)
   Status = EfiBootManagerAddKeyOptionVariable(
       NULL, (UINT16)BootOption.OptionNumber, 0, &UP, NULL);
   ASSERT(Status == EFI_SUCCESS || Status == EFI_ALREADY_STARTED);
+  Status = EfiBootManagerAddKeyOptionVariable(
+      NULL, (UINT16)BootOption.OptionNumber, 0, &Esc, NULL);
+  ASSERT(Status == EFI_SUCCESS || Status == EFI_ALREADY_STARTED);
 }
 
 //
@@ -502,21 +505,45 @@ VOID EFIAPI PlatformBootManagerBeforeConsole(VOID)
   EfiBootManagerUpdateConsoleVariable(
       ConIn, (EFI_DEVICE_PATH_PROTOCOL *)&mUsbKeyboard, NULL);
 
-  EFI_HANDLE *              handles;
-  UINTN                     NoHandles;
-  EFI_DEVICE_PATH_PROTOCOL *devicehandle;
-  /*CHAR16 *devicepathtxt;*/
-   EfiBootManagerUpdateConsoleVariable(ConIn,
-    (EFI_DEVICE_PATH_PROTOCOL*)&gEFIDroidKeypadDeviceProtocolGuid, NULL);
-  gBS->LocateHandleBuffer(
-      ByProtocol, &gEfiSimpleTextInputExProtocolGuid, NULL, &NoHandles,
-      &handles);
-  devicehandle = DevicePathFromHandle(handles[1]);
-  EfiBootManagerUpdateConsoleVariable(
-      ConIn, devicehandle, NULL); /*
-            devicepathtxt = ConvertDevicePathToText(devicehandle,TRUE,TRUE);
-            DEBUG((DEBUG_ERROR,"There are %s handles\n",devicepathtxt));
-            ASSERT(0);*/
+  //
+  // Add the internal keypad (and any other text input) device paths to ConIn.
+  // Never treat a protocol GUID as a device path, and never index the handle
+  // buffer without checking its count.
+  //
+  {
+    EFI_HANDLE *Handles = NULL;
+    UINTN       NoHandles = 0;
+    UINTN       Idx;
+    EFI_STATUS  Status;
+
+    Status = gBS->LocateHandleBuffer(
+        ByProtocol, &gEFIDroidKeypadDeviceProtocolGuid, NULL, &NoHandles,
+        &Handles);
+    if (!EFI_ERROR(Status) && NoHandles > 0 && Handles != NULL) {
+      for (Idx = 0; Idx < NoHandles; Idx++) {
+        EFI_DEVICE_PATH_PROTOCOL *DevicePath = DevicePathFromHandle(Handles[Idx]);
+        if (DevicePath != NULL) {
+          EfiBootManagerUpdateConsoleVariable(ConIn, DevicePath, NULL);
+        }
+      }
+      gBS->FreePool(Handles);
+    }
+
+    Handles   = NULL;
+    NoHandles = 0;
+    Status = gBS->LocateHandleBuffer(
+        ByProtocol, &gEfiSimpleTextInputExProtocolGuid, NULL, &NoHandles,
+        &Handles);
+    if (!EFI_ERROR(Status) && NoHandles > 0 && Handles != NULL) {
+      for (Idx = 0; Idx < NoHandles; Idx++) {
+        EFI_DEVICE_PATH_PROTOCOL *DevicePath = DevicePathFromHandle(Handles[Idx]);
+        if (DevicePath != NULL) {
+          EfiBootManagerUpdateConsoleVariable(ConIn, DevicePath, NULL);
+        }
+      }
+      gBS->FreePool(Handles);
+    }
+  }
 
   //
   // Add the hardcoded serial console device path to ConIn, ConOut, ErrOut.
